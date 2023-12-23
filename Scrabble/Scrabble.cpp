@@ -8,6 +8,52 @@ const char FILE_NAME[] = "WordsDictionary.txt";
 const unsigned WORD_MAX_LENGTH = 100;
 const unsigned ENGLISH_LETTERS_COUNT = 26;
 
+
+int compareWords(const char* firstWord, const char* secondWord)
+{
+	if (!firstWord || !secondWord)
+	{
+		return 0;
+	}
+
+	while ((*firstWord) && (*firstWord == *secondWord))
+	{
+		firstWord++;
+		secondWord++;
+	}
+
+	return *firstWord - *secondWord;
+}
+
+
+bool findWordInDictionary(const char* const* words, unsigned wordsCount, const char* enteredWord)
+{
+	unsigned left = 0;
+	unsigned right = wordsCount - 1;
+
+	while (left <= right)
+	{
+		unsigned mid = left + (right - left) / 2;
+		int wordsDifference = compareWords(enteredWord, words[mid]);
+
+		if (wordsDifference == 0)
+		{
+			return true;
+		}
+
+		if (wordsDifference < 0)
+		{
+			right = mid - 1;
+		}
+		else
+		{
+			left = mid + 1;
+		}
+	}
+
+	return false;
+}
+
 void printGeneratedLetters(const char* letters, unsigned lettersCount)
 {
 	for (size_t i = 0; i < lettersCount; i++)
