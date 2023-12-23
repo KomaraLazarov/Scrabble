@@ -8,6 +8,22 @@ const char FILE_NAME[] = "WordsDictionary.txt";
 const unsigned WORD_MAX_LENGTH = 100;
 const unsigned ENGLISH_LETTERS_COUNT = 26;
 
+unsigned calculatePointsForWord(char* word)
+{
+	if (!word)
+	{
+		return 0;
+	}
+
+	unsigned result = 0;
+	while (*word)
+	{
+		result++;
+		word++;
+	}
+
+	return result;
+}
 
 int compareWords(const char* firstWord, const char* secondWord)
 {
@@ -24,7 +40,6 @@ int compareWords(const char* firstWord, const char* secondWord)
 
 	return *firstWord - *secondWord;
 }
-
 
 bool findWordInDictionary(const char* const* words, unsigned wordsCount, const char* enteredWord)
 {
@@ -86,7 +101,7 @@ int readFile(const char filename[], char**& words, unsigned& wordsCount)
 
 	myFile >> wordsCount;
 
-	words = new char*[wordsCount];
+	words = new char* [wordsCount];
 	for (size_t i = 0; i < wordsCount; i++)
 	{
 		unsigned lenOfWord;
@@ -103,10 +118,24 @@ int main()
 {
 	srand(time(NULL));
 	char** words = nullptr;
-	unsigned wordsCount = 0;
+	unsigned wordsCount = 0, score = 0;
 
 	char* arr = new char[11];
 	generateRandomLetters(arr, 10);
 
 	readFile(FILE_NAME, words, wordsCount);
+
+	char* enteredWord = new char[WORD_MAX_LENGTH];
+	cin >> enteredWord;
+
+	if (findWordInDictionary(words, wordsCount, enteredWord))
+	{
+		score += calculatePointsForWord(enteredWord);
+	}
+	else
+	{
+		// TODO - repeate again
+	}
+
+	cout << score << endl;
 }
