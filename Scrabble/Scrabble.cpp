@@ -8,6 +8,22 @@ const char FILE_NAME[] = "WordsDictionary.txt";
 const unsigned WORD_MAX_LENGTH = 100;
 const unsigned ENGLISH_LETTERS_COUNT = 26;
 
+int compareWords(const char* firstWord, const char* secondWord)
+{
+	if (!firstWord || !secondWord)
+	{
+		return 0;
+	}
+
+	while ((*firstWord) && (*firstWord == *secondWord))
+	{
+		firstWord++;
+		secondWord++;
+	}
+
+	return *firstWord - *secondWord;
+}
+
 unsigned calculatePointsForWord(char* word)
 {
 	if (!word)
@@ -23,22 +39,6 @@ unsigned calculatePointsForWord(char* word)
 	}
 
 	return result;
-}
-
-int compareWords(const char* firstWord, const char* secondWord)
-{
-	if (!firstWord || !secondWord)
-	{
-		return 0;
-	}
-
-	while ((*firstWord) && (*firstWord == *secondWord))
-	{
-		firstWord++;
-		secondWord++;
-	}
-
-	return *firstWord - *secondWord;
 }
 
 bool findWordInDictionary(const char* const* words, unsigned wordsCount, const char* enteredWord)
@@ -90,7 +90,7 @@ void generateRandomLetters(char* letters, unsigned lettersCount)
 	printGeneratedLetters(letters, lettersCount);
 }
 
-int readFile(const char filename[], char**& words, unsigned& wordsCount)
+int readWordsFromFile(const char filename[], char**& words, unsigned& wordsCount)
 {
 	ifstream myFile(filename);
 
@@ -102,7 +102,8 @@ int readFile(const char filename[], char**& words, unsigned& wordsCount)
 	myFile >> wordsCount;
 
 	words = new char* [wordsCount];
-	for (size_t i = 0; i < wordsCount; i++)
+
+	for (size_t i = 0; i < wordsCount - 1; i++)
 	{
 		unsigned lenOfWord;
 		myFile >> lenOfWord;
@@ -114,6 +115,77 @@ int readFile(const char filename[], char**& words, unsigned& wordsCount)
 	return 0;
 }
 
+int writeAWordInFile(const char filename[], const char* const* words, unsigned wordsCount)
+{
+	ofstream myFile(filename);
+
+	myFile.clear();
+
+	if (!myFile.is_open())
+	{
+		return 1;
+	}
+
+	myFile << wordsCount << endl;
+
+	for (size_t i = 0; i < wordsCount - 1; i++)
+	{
+		myFile << words[i] << endl;
+	}
+
+	myFile.close();
+	return 0;
+}
+
+int newAddedWordIndex(const char* const* words, unsigned wordsCount, const char* newWord)
+{
+	unsigned left = 0, mid = 0;
+	unsigned right = wordsCount - 1;
+
+	while (left <= right)
+	{
+		mid = left + (right - left) / 2;
+
+		int wordsDifference = compareWords(newWord, words[mid]);
+
+		if (wordsDifference == 0)
+		{
+			return -1;
+		}
+
+		if (wordsDifference < 0)
+		{
+			right = mid - 1;
+		}
+		else
+		{
+			left = mid + 1;
+		}
+	}
+
+	return mid;
+}
+
+void addWord(char**& words, unsigned& wordsCount)
+{
+	char* newWord = new char[WORD_MAX_LENGTH];
+	cin >> newWord;
+
+	unsigned newWordIndex = newAddedWordIndex(words, wordsCount, newWord);
+
+	if (newWordIndex != -1)
+	{
+		wordsCount++;
+		cout << "Word added successfully!";
+	}
+	else
+	{
+		cout << "Word already exists!";
+	}
+
+	writeAWordInFile(FILE_NAME, words, wordsCount);
+}
+
 int main()
 {
 	srand(time(NULL));
@@ -123,7 +195,7 @@ int main()
 	char* arr = new char[11];
 	generateRandomLetters(arr, 10);
 
-	readFile(FILE_NAME, words, wordsCount);
+	readWordsFromFile(FILE_NAME, words, wordsCount);
 
 	char* enteredWord = new char[WORD_MAX_LENGTH];
 	cin >> enteredWord;
@@ -138,4 +210,6 @@ int main()
 	}
 
 	cout << score << endl;
+
+	addWord(words, wordsCount);
 }
