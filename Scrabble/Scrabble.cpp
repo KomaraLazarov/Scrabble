@@ -103,7 +103,7 @@ int readWordsFromFile(const char filename[], char**& words, unsigned& wordsCount
 
 	words = new char* [wordsCount];
 
-	for (size_t i = 0; i < wordsCount - 1; i++)
+	for (size_t i = 0; i < wordsCount; i++)
 	{
 		unsigned lenOfWord;
 		myFile >> lenOfWord;
@@ -113,6 +113,23 @@ int readWordsFromFile(const char filename[], char**& words, unsigned& wordsCount
 
 	myFile.close();
 	return 0;
+}
+
+unsigned getLength(const char* currentWord)
+{
+	if (!currentWord)
+	{
+		return 0;
+	}
+
+	unsigned result = 0;
+	while (*currentWord)
+	{
+		result++;
+		currentWord++;
+	}
+
+	return result;
 }
 
 int writeAWordInFile(const char filename[], const char* const* words, unsigned wordsCount)
@@ -128,8 +145,9 @@ int writeAWordInFile(const char filename[], const char* const* words, unsigned w
 
 	myFile << wordsCount << endl;
 
-	for (size_t i = 0; i < wordsCount - 1; i++)
+	for (size_t i = 0; i < wordsCount; i++)
 	{
+		myFile << getLength(words[i]) << " ";
 		myFile << words[i] << endl;
 	}
 
@@ -176,14 +194,24 @@ void addWord(char**& words, unsigned& wordsCount)
 	if (newWordIndex != -1)
 	{
 		wordsCount++;
+		char** updatedDictionary = new char* [wordsCount];
+		for (size_t i = 0; i <= newWordIndex; i++)
+		{
+			updatedDictionary[i] = words[i];
+		}
+		updatedDictionary[newWordIndex + 1] = newWord;
+		for (size_t j = newWordIndex + 2; j <= wordsCount; j++)
+		{
+			updatedDictionary[j] = words[j - 1];
+		}
+
+		words = updatedDictionary;
 		cout << "Word added successfully!";
 	}
 	else
 	{
 		cout << "Word already exists!";
 	}
-
-	writeAWordInFile(FILE_NAME, words, wordsCount);
 }
 
 int main()
@@ -212,4 +240,5 @@ int main()
 	cout << score << endl;
 
 	addWord(words, wordsCount);
+	writeAWordInFile(FILE_NAME, words, wordsCount);
 }
