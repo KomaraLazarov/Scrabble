@@ -8,6 +8,50 @@ const char FILE_NAME[] = "WordsDictionary.txt";
 const unsigned WORD_MAX_LENGTH = 100;
 const unsigned ENGLISH_LETTERS_COUNT = 26;
 
+unsigned getLength(const char* currentWord)
+{
+	if (!currentWord)
+	{
+		return 0;
+	}
+
+	unsigned result = 0;
+	while (*currentWord)
+	{
+		result++;
+		currentWord++;
+	}
+
+	return result;
+}
+
+bool isWordMadeUpOfTheLetters(char* letters, const char* enteredWord)
+{
+	if (!letters || !enteredWord)
+	{
+		return false;
+	}
+
+	unsigned lettersCount = getLength(letters);
+	unsigned currentWordCount = getLength(enteredWord);
+	unsigned count = 0;
+	while (*enteredWord)
+	{
+		for (size_t i = 0; i < lettersCount; i++)
+		{
+			if (*enteredWord == letters[i])
+			{
+				letters[i] = ' ';
+				count++;
+				break;
+			}
+		}
+		enteredWord++;
+	}
+
+	return count == currentWordCount;
+}
+
 int compareWords(const char* firstWord, const char* secondWord)
 {
 	if (!firstWord || !secondWord)
@@ -78,7 +122,7 @@ void printGeneratedLetters(const char* letters, unsigned lettersCount)
 	cout << endl;
 }
 
-void generateRandomLetters(char* letters, unsigned lettersCount)
+void generateRandomLetters(char*& letters, unsigned lettersCount)
 {
 	for (size_t i = 0; i < lettersCount; i++)
 	{
@@ -113,23 +157,6 @@ int readWordsFromFile(const char filename[], char**& words, unsigned& wordsCount
 
 	myFile.close();
 	return 0;
-}
-
-unsigned getLength(const char* currentWord)
-{
-	if (!currentWord)
-	{
-		return 0;
-	}
-
-	unsigned result = 0;
-	while (*currentWord)
-	{
-		result++;
-		currentWord++;
-	}
-
-	return result;
 }
 
 int writeAWordInFile(const char filename[], const char* const* words, unsigned wordsCount)
@@ -220,13 +247,14 @@ int main()
 	char** words = nullptr;
 	unsigned wordsCount = 0, score = 0;
 
-	char* arr = new char[11];
-	generateRandomLetters(arr, 10);
+	char* letters = new char[11];
+	generateRandomLetters(letters, 10);
 
 	readWordsFromFile(FILE_NAME, words, wordsCount);
 
 	char* enteredWord = new char[WORD_MAX_LENGTH];
 	cin >> enteredWord;
+	cout << isWordMadeUpOfTheLetters(letters, enteredWord);
 
 	if (findWordInDictionary(words, wordsCount, enteredWord))
 	{
@@ -239,6 +267,6 @@ int main()
 
 	cout << score << endl;
 
-	addWord(words, wordsCount);
-	writeAWordInFile(FILE_NAME, words, wordsCount);
+	/*addWord(words, wordsCount);
+	writeAWordInFile(FILE_NAME, words, wordsCount);*/
 }
