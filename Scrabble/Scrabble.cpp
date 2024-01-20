@@ -7,6 +7,7 @@ using namespace std;
 const char FILE_NAME[] = "WordsDictionary.txt";
 const unsigned WORD_MAX_LENGTH = 100;
 const unsigned ENGLISH_LETTERS_COUNT = 26;
+const unsigned EXIT_NUMBER = 4;
 
 unsigned getLength(const char* currentWord)
 {
@@ -25,7 +26,7 @@ unsigned getLength(const char* currentWord)
 	return result;
 }
 
-bool isWordMadeUpOfTheLetters(char* letters, const char* enteredWord)
+bool isWordMadeUpOfTheLetters(char* letters, const char* enteredWord) // TODO: IF THIS HELP ARRAY USEFULL
 {
 	if (!letters || !enteredWord)
 	{
@@ -33,15 +34,16 @@ bool isWordMadeUpOfTheLetters(char* letters, const char* enteredWord)
 	}
 
 	unsigned lettersCount = getLength(letters);
+	int* checkLetters = new int[lettersCount] {0};
 	unsigned currentWordCount = getLength(enteredWord);
 	unsigned count = 0;
 	while (*enteredWord)
 	{
 		for (size_t i = 0; i < lettersCount; i++)
 		{
-			if (*enteredWord == letters[i])
+			if (*enteredWord == letters[i] && !checkLetters[i])
 			{
-				letters[i] = ' ';
+				checkLetters[i] = 1;
 				count++;
 				break;
 			}
@@ -130,8 +132,6 @@ void generateRandomLetters(char*& letters, unsigned lettersCount)
 		letters[i] = number + 'a';
 	}
 	letters[lettersCount] = '\0';
-
-	printGeneratedLetters(letters, lettersCount);
 }
 
 int readWordsFromFile(const char filename[], char**& words, unsigned& wordsCount)
@@ -159,7 +159,7 @@ int readWordsFromFile(const char filename[], char**& words, unsigned& wordsCount
 	return 0;
 }
 
-int writeAWordInFile(const char filename[], const char* const* words, unsigned wordsCount)
+int writeWordInFile(const char filename[], const char* const* words, unsigned wordsCount)
 {
 	ofstream myFile(filename);
 
@@ -233,40 +233,129 @@ void addWord(char**& words, unsigned& wordsCount)
 		}
 
 		words = updatedDictionary;
-		cout << "Word added successfully!";
+		cout << "Word added successfully!" << endl;
 	}
 	else
 	{
-		cout << "Word already exists!";
+		cout << "Word already exists!" << endl;
+	}
+}
+
+void changeGameSettings(unsigned& lettersCount, unsigned& gameRounds)
+{
+	char option = ' ';
+	cin >> option;
+	if (option == 'a')
+	{
+		unsigned updateCount = 0;
+		cout << "Change count of letters: ";
+		cin >> updateCount;
+		lettersCount = updateCount;
+	}
+	else if (option == 'b')
+	{
+		unsigned updateRounds = 0;
+		cout << "Change count of rounds: ";
+		cin >> updateRounds;
+		gameRounds = updateRounds;
+	}
+}
+// TODO : CONST ** CHECK !!!
+void startGame(char* letters, char** words, unsigned wordsCount, unsigned score, unsigned lettersCount, unsigned gameRounds)
+{
+	char* enteredWord = nullptr;
+	for (size_t i = 1; i <= gameRounds; i++)
+	{
+		cout << "Round " << i << ". ";
+		cout << "Available letters: ";
+		generateRandomLetters(letters, lettersCount);
+		printGeneratedLetters(letters, lettersCount);
+
+		while (true)
+		{
+			enteredWord = new char[WORD_MAX_LENGTH];
+			cin >> enteredWord;
+
+			if (isWordMadeUpOfTheLetters(letters, enteredWord) && findWordInDictionary(words, wordsCount, enteredWord))
+			{
+				score += calculatePointsForWord(enteredWord);
+				break;
+			}
+
+			cout << "Invalid word. Try again with: ";
+			printGeneratedLetters(letters, lettersCount);
+		}
+
+		cout << "Your points so far are: " << score << endl;
+	}
+	cout << "Your total points are: " << score << endl;
+}
+void menuDesign()
+{
+	cout << " _____________________________________________" << endl;
+	cout << "|                                             |" << endl;
+	cout << "|                 Scrabble game               |" << endl;
+	cout << "|_____________________________________________|" << endl;
+	cout << "|                                             |" << endl;
+	cout << "|                   MAIN MENU                 |" << endl;
+	cout << "|                                             |" << endl;
+	cout << "|  1. START NEW GAME                          |" << endl;
+	cout << "|                                             |" << endl;
+	cout << "|  2. SETTINGS:                               |" << endl;
+	cout << "|   a. CHOOSE COUNT OF LETTERS (DEFAULT - 10) |" << endl;
+	cout << "|   b. CHOOSE COUNT OF ROUNDS (DEFAULT - 10)  |" << endl;
+	cout << "|                                             |" << endl;
+	cout << "|  3. ENTER A NEW WORD                        |" << endl;
+	cout << "|                                             |" << endl;
+	cout << "|  4. EXIT                                    |" << endl;
+	cout << "|_____________________________________________|" << endl;
+}
+void selectingMenuFunctionality(char* letters, char** words, unsigned wordsCount, unsigned score,
+	unsigned lettersCount, unsigned gameRounds)
+{
+	unsigned numberOfFunctionality = 0;
+
+	while (true)
+	{
+		cin >> numberOfFunctionality;
+		if (numberOfFunctionality == EXIT_NUMBER)
+		{
+			break;
+		}
+
+		switch (numberOfFunctionality)
+		{
+		case 1:
+			startGame(letters, words, wordsCount, score, lettersCount, gameRounds);
+			break;
+		case 2:
+			changeGameSettings(lettersCount, gameRounds); // TODO: CHANGE THIS NAME MAYBE AND CHECK IF I WILL SEPARATE THIS FUNC
+			break;
+		case 3:
+			addWord(words, wordsCount);
+			writeWordInFile(FILE_NAME, words, wordsCount);
+			break;
+
+		default:
+			break;
+		}
+
+		menuDesign();
 	}
 }
 
 int main()
 {
+	menuDesign();
+
 	srand(time(NULL));
 	char** words = nullptr;
-	unsigned wordsCount = 0, score = 0;
+	unsigned wordsCount = 0, score = 0, lettersCount = 10, gameRounds = 10;
+	char* letters = new char[lettersCount + 1];
 
-	char* letters = new char[11];
-	generateRandomLetters(letters, 10);
+	// TODO: Make the returning in the menu after ending
+	// TODO: DELETE DYNAMIC ARRAYS
 
-	readWordsFromFile(FILE_NAME, words, wordsCount);
-
-	char* enteredWord = new char[WORD_MAX_LENGTH];
-	cin >> enteredWord;
-	cout << isWordMadeUpOfTheLetters(letters, enteredWord);
-
-	if (findWordInDictionary(words, wordsCount, enteredWord))
-	{
-		score += calculatePointsForWord(enteredWord);
-	}
-	else
-	{
-		// TODO - repeate again
-	}
-
-	cout << score << endl;
-
-	/*addWord(words, wordsCount);
-	writeAWordInFile(FILE_NAME, words, wordsCount);*/
+	readWordsFromFile(FILE_NAME, words, wordsCount); // TODO: IF THIS MUST BE HERE
+	selectingMenuFunctionality(letters, words, wordsCount, score, lettersCount, gameRounds);
 }
