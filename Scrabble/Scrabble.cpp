@@ -1,3 +1,18 @@
+/**
+*
+* Solution to course project # <7>
+* Introduction to programming course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2023/2024
+*
+* @author <Nikola Lazarov>
+* @idnumber <5MI0600332>
+* @compiler <GCC>
+*
+* <Scrabble game>
+*
+*/
+
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
