@@ -216,7 +216,7 @@ int newAddedWordIndex(const char* const* words, unsigned wordsCount, const char*
 	return mid;
 }
 
-void addWord(char**& words, unsigned& wordsCount)
+bool addWord(char**& words, unsigned& wordsCount)
 {
 	cout << "Enter word: ";
 	char* newWord = new char[WORD_MAX_LENGTH + 1];
@@ -240,11 +240,10 @@ void addWord(char**& words, unsigned& wordsCount)
 
 		words = updatedDictionary;
 		cout << "Word added successfully!" << endl;
+		return true;
 	}
-	else
-	{
-		cout << "Word already exists!" << endl;
-	}
+	cout << "Word already exists!" << endl;
+	return false;
 }
 
 void changeGameSettings(unsigned& lettersCount, unsigned& gameRounds)
@@ -347,6 +346,7 @@ void showMenuDesign()
 void selectingMenuFunctionality(char** words, unsigned wordsCount)
 {
 	unsigned functionalityNumber = 0, gameRounds = 10, lettersCount = 10;
+	bool areThereAddedWords = false;
 
 	while (true)
 	{
@@ -363,10 +363,13 @@ void selectingMenuFunctionality(char** words, unsigned wordsCount)
 			changeGameSettings(lettersCount, gameRounds); 
 			break;
 		case 3:
-			addWord(words, wordsCount);
+			areThereAddedWords = addWord(words, wordsCount);
 			break;
 		case 4:
-			writeWordInFile(FILE_NAME, words, wordsCount);
+			if (areThereAddedWords)
+			{
+				writeWordInFile(FILE_NAME, words, wordsCount);
+			}
 			return;
 		default:
 			cout << "Incorrect imput! Try again!" << endl;
